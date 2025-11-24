@@ -1,0 +1,585 @@
+-- 🎰 JACKABE SLOT MACHINE 🎰
+-- With 0.5% "We're Broke" effect that's actually rollable!
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+-- Create the slot machine GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "JackabeSlotMachine"
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Main window matching your screenshot
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 350, 0, 280)
+MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(100, 100, 120)
+MainFrame.Parent = ScreenGui
+
+-- Top bar with gradient like your screenshot
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 30)
+TopBar.Position = UDim2.new(0, 0, 0, 0)
+TopBar.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
+
+-- JACKABE title (exact font and style)
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "JACKABE"
+Title.TextColor3 = Color3.fromRGB(255, 255, 0)
+Title.TextSize = 20
+Title.Font = Enum.Font.GothamBlack
+Title.Parent = TopBar
+
+-- SLOF subtitle
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Size = UDim2.new(1, 0, 0, 15)
+Subtitle.Position = UDim2.new(0, 0, 0, 30)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Text = "SLOTS"
+Subtitle.TextColor3 = Color3.fromRGB(200, 200, 255)
+Subtitle.TextSize = 12
+Subtitle.Font = Enum.Font.GothamBold
+Subtitle.Parent = MainFrame
+
+-- Make frame movable via top bar
+local dragging = false
+local dragInput, dragStart, startPos
+
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TopBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Real slot machine reels container (like your screenshot)
+local ReelsContainer = Instance.new("Frame")
+ReelsContainer.Size = UDim2.new(1, -40, 0, 120)
+ReelsContainer.Position = UDim2.new(0, 20, 0, 55)
+ReelsContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+ReelsContainer.BorderSizePixel = 2
+ReelsContainer.BorderColor3 = Color3.fromRGB(80, 80, 100)
+ReelsContainer.Parent = MainFrame
+
+-- Individual reel frames with proper slot machine look
+local Reel1 = Instance.new("Frame")
+Reel1.Size = UDim2.new(0.28, 0, 0.8, 0)
+Reel1.Position = UDim2.new(0.05, 0, 0.1, 0)
+Reel1.BackgroundColor3 = Color3.fromRGB(220, 220, 240)
+Reel1.BorderSizePixel = 2
+Reel1.BorderColor3 = Color3.fromRGB(150, 150, 170)
+Reel1.Parent = ReelsContainer
+
+local Reel2 = Instance.new("Frame")
+Reel2.Size = UDim2.new(0.28, 0, 0.8, 0)
+Reel2.Position = UDim2.new(0.36, 0, 0.1, 0)
+Reel2.BackgroundColor3 = Color3.fromRGB(220, 220, 240)
+Reel2.BorderSizePixel = 2
+Reel2.BorderColor3 = Color3.fromRGB(150, 150, 170)
+Reel2.Parent = ReelsContainer
+
+local Reel3 = Instance.new("Frame")
+Reel3.Size = UDim2.new(0.28, 0, 0.8, 0)
+Reel3.Position = UDim2.new(0.67, 0, 0.1, 0)
+Reel3.BackgroundColor3 = Color3.fromRGB(220, 220, 240)
+Reel3.BorderSizePixel = 2
+Reel3.BorderColor3 = Color3.fromRGB(150, 150, 170)
+Reel3.Parent = ReelsContainer
+
+-- Reel symbols (centered and bold)
+local Symbol1 = Instance.new("TextLabel")
+Symbol1.Size = UDim2.new(1, 0, 1, 0)
+Symbol1.Position = UDim2.new(0, 0, 0, 0)
+Symbol1.BackgroundTransparency = 1
+Symbol1.Text = "🍒"
+Symbol1.TextColor3 = Color3.fromRGB(0, 0, 0)
+Symbol1.TextSize = 35
+Symbol1.Font = Enum.Font.GothamBlack
+Symbol1.Parent = Reel1
+
+local Symbol2 = Instance.new("TextLabel")
+Symbol2.Size = UDim2.new(1, 0, 1, 0)
+Symbol2.Position = UDim2.new(0, 0, 0, 0)
+Symbol2.BackgroundTransparency = 1
+Symbol2.Text = "🍋"
+Symbol2.TextColor3 = Color3.fromRGB(0, 0, 0)
+Symbol2.TextSize = 35
+Symbol2.Font = Enum.Font.GothamBlack
+Symbol2.Parent = Reel2
+
+local Symbol3 = Instance.new("TextLabel")
+Symbol3.Size = UDim2.new(1, 0, 1, 0)
+Symbol3.Position = UDim2.new(0, 0, 0, 0)
+Symbol3.BackgroundTransparency = 1
+Symbol3.Text = "💎"
+Symbol3.TextColor3 = Color3.fromRGB(0, 0, 0)
+Symbol3.TextSize = 35
+Symbol3.Font = Enum.Font.GothamBlack
+Symbol3.Parent = Reel3
+
+-- Status display (like your screenshot)
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(1, -40, 0, 30)
+StatusLabel.Position = UDim2.new(0, 20, 0, 185)
+StatusLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+StatusLabel.Text = "Click SPIN to start!"
+StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+StatusLabel.TextSize = 12
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextWrapped = true
+StatusLabel.Parent = MainFrame
+
+-- Big red spin button (like real slot machine)
+local SpinButton = Instance.new("TextButton")
+SpinButton.Size = UDim2.new(0, 120, 0, 35)
+SpinButton.Position = UDim2.new(0.5, -60, 0, 225)
+SpinButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+SpinButton.Text = "SPIN"
+SpinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpinButton.TextSize = 16
+SpinButton.Font = Enum.Font.GothamBlack
+SpinButton.Parent = MainFrame
+
+-- Track used powers to prevent duplicates
+local UsedPowers = {}
+
+-- Legendary effect function
+local function CreateLegendaryEffect()
+    -- Gold flash effect
+    local flashFrame = Instance.new("Frame")
+    flashFrame.Size = UDim2.new(1, 0, 1, 0)
+    flashFrame.Position = UDim2.new(0, 0, 0, 0)
+    flashFrame.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+    flashFrame.BackgroundTransparency = 0.8
+    flashFrame.Parent = ScreenGui
+    
+    -- Sparkle particles
+    for i = 1, 15 do
+        local sparkle = Instance.new("TextLabel")
+        sparkle.Size = UDim2.new(0, 30, 0, 30)
+        sparkle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        sparkle.BackgroundTransparency = 1
+        sparkle.Text = "✨"
+        sparkle.TextSize = 25
+        sparkle.TextColor3 = Color3.fromRGB(255, 255, 0)
+        sparkle.Parent = flashFrame
+        game:GetService("Debris"):AddItem(sparkle, 2)
+    end
+    
+    -- Legendary text
+    local legendaryText = Instance.new("TextLabel")
+    legendaryText.Size = UDim2.new(1, 0, 0, 80)
+    legendaryText.Position = UDim2.new(0, 0, 0.4, 0)
+    legendaryText.BackgroundTransparency = 1
+    legendaryText.Text = "🌟 LEGENDARY! 🌟"
+    legendaryText.TextColor3 = Color3.fromRGB(255, 215, 0)
+    legendaryText.TextSize = 32
+    legendaryText.Font = Enum.Font.GothamBlack
+    legendaryText.TextStrokeTransparency = 0
+    legendaryText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    legendaryText.Parent = flashFrame
+    
+    -- Pulse animation
+    for i = 1, 6 do
+        flashFrame.BackgroundTransparency = 0.6
+        legendaryText.TextColor3 = Color3.fromRGB(255, 255, 0)
+        wait(0.2)
+        flashFrame.BackgroundTransparency = 0.8
+        legendaryText.TextColor3 = Color3.fromRGB(255, 215, 0)
+        wait(0.2)
+    end
+    
+    flashFrame:Destroy()
+end
+
+-- "We're Broke" effect function (0.5% chance)
+local function WereBrokeEffect()
+    -- Reset character
+    local character = LocalPlayer.Character
+    if character then
+        character:BreakJoints()
+    end
+    
+    -- Create broke effect overlay
+    local brokeFrame = Instance.new("Frame")
+    brokeFrame.Size = UDim2.new(1, 0, 1, 0)
+    brokeFrame.Position = UDim2.new(0, 0, 0, 0)
+    brokeFrame.BackgroundColor3 = Color3.fromRGB(139, 69, 19) -- Brown color for "broke"
+    brokeFrame.BackgroundTransparency = 0.4
+    brokeFrame.Parent = ScreenGui
+    
+    -- Main broke text
+    local brokeText = Instance.new("TextLabel")
+    brokeText.Size = UDim2.new(1, 0, 0, 80)
+    brokeText.Position = UDim2.new(0, 0, 0.3, 0)
+    brokeText.BackgroundTransparency = 1
+    brokeText.Text = "💸 WE'RE BROKE! 💸\nResetting character..."
+    brokeText.TextColor3 = Color3.fromRGB(255, 215, 0)
+    brokeText.TextSize = 28
+    brokeText.Font = Enum.Font.GothamBlack
+    brokeText.TextStrokeTransparency = 0
+    brokeText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    brokeText.Parent = brokeFrame
+    
+    -- Money emojis flying around
+    for i = 1, 25 do
+        local money = Instance.new("TextLabel")
+        money.Size = UDim2.new(0, 40, 0, 40)
+        money.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        money.BackgroundTransparency = 1
+        money.Text = "💸"
+        money.TextSize = 30
+        money.TextColor3 = Color3.fromRGB(255, 215, 0)
+        money.Parent = brokeFrame
+        game:GetService("Debris"):AddItem(money, 4)
+    end
+    
+    -- Heartbreak emojis
+    for i = 1, 15 do
+        local heartbreak = Instance.new("TextLabel")
+        heartbreak.Size = UDim2.new(0, 35, 0, 35)
+        heartbreak.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        heartbreak.BackgroundTransparency = 1
+        heartbreak.Text = "💔"
+        heartbreak.TextSize = 25
+        heartbreak.TextColor3 = Color3.fromRGB(255, 0, 0)
+        heartbreak.Parent = brokeFrame
+        game:GetService("Debris"):AddItem(heartbreak, 4)
+    end
+    
+    -- Pulse animation
+    for i = 1, 8 do
+        brokeFrame.BackgroundTransparency = 0.3
+        brokeText.TextColor3 = Color3.fromRGB(255, 255, 0)
+        wait(0.3)
+        brokeFrame.BackgroundTransparency = 0.4
+        brokeText.TextColor3 = Color3.fromRGB(255, 215, 0)
+        wait(0.3)
+    end
+    
+    brokeFrame:Destroy()
+end
+
+-- Vegetable lock function (1% chance)
+local function VegetableLock()
+    -- Freeze player
+    local character = LocalPlayer.Character
+    if character and character:FindFirstChild("Humanoid") then
+        character.Humanoid.WalkSpeed = 0
+        character.Humanoid.JumpPower = 0
+    end
+    
+    -- Create vegetable overlay
+    local vegFrame = Instance.new("Frame")
+    vegFrame.Size = UDim2.new(1, 0, 1, 0)
+    vegFrame.Position = UDim2.new(0, 0, 0, 0)
+    vegFrame.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+    vegFrame.BackgroundTransparency = 0.3
+    vegFrame.Parent = ScreenGui
+    
+    local vegText = Instance.new("TextLabel")
+    vegText.Size = UDim2.new(1, 0, 0, 100)
+    vegText.Position = UDim2.new(0, 0, 0.4, 0)
+    vegText.BackgroundTransparency = 1
+    vegText.Text = "🥦 VEGETABLE LOCKED! 🥦\nYou became a vegetable!"
+    vegText.TextColor3 = Color3.fromRGB(0, 255, 0)
+    vegText.TextSize = 24
+    vegText.Font = Enum.Font.GothamBlack
+    vegText.TextStrokeTransparency = 0
+    vegText.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+    vegText.Parent = vegFrame
+    
+    -- Spam vegetables
+    for i = 1, 20 do
+        local veg = Instance.new("TextLabel")
+        veg.Size = UDim2.new(0, 50, 0, 50)
+        veg.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        veg.BackgroundTransparency = 1
+        veg.Text = "🥦"
+        veg.TextSize = 30
+        veg.TextColor3 = Color3.fromRGB(0, 255, 0)
+        veg.Parent = vegFrame
+        game:GetService("Debris"):AddItem(veg, 3)
+    end
+    
+    wait(5)
+    vegFrame:Destroy()
+    
+    -- Unfreeze after 5 seconds
+    if character and character:FindFirstChild("Humanoid") then
+        character.Humanoid.WalkSpeed = 16
+        character.Humanoid.JumpPower = 50
+    end
+end
+
+-- Script loading functions
+local function LoadFlyGuiV3()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+    end)
+end
+
+local function LoadGoonScript()
+    pcall(function()
+        loadstring(game:HttpGet("https://pastefy.app/lawnvcTT/raw", true))()
+    end)
+end
+
+local function LoadInfiniteYield()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end)
+end
+
+local function LoadFlingScript()
+    pcall(function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/LgZwZ7ZB",true))()
+    end)
+end
+
+local function LoadAimlockScript()
+    pcall(function()
+        loadstring(game:HttpGet("https://incorbxlua.onrender.com/raw/e13dcaad-b95f-4e5b-8c3a-1d6a8faf96a0",true))()
+    end)
+end
+
+local function LoadInstantTransmission()
+    pcall(function()
+        loadstring(game:HttpGet("https://incorbxlua.onrender.com/raw/9cda780c-3b18-4e79-b47a-5fdd19709dcf",true))()
+    end)
+end
+
+local function LoadInvisibleScript()
+    pcall(function()
+        loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))()
+    end)
+end
+
+-- Power functions
+local CurrentNoclipConnection = nil
+local CurrentESP = {}
+
+local function GiveSpeedBoost()
+    local character = LocalPlayer.Character
+    if character and character:FindFirstChild("Humanoid") then
+        character.Humanoid.WalkSpeed = 50
+    end
+end
+
+local function GiveNoclip()
+    if CurrentNoclipConnection then
+        CurrentNoclipConnection:Disconnect()
+    end
+    
+    CurrentNoclipConnection = RunService.Stepped:Connect(function()
+        local character = LocalPlayer.Character
+        if character then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+local function GiveESP()
+    for _, highlight in pairs(CurrentESP) do
+        highlight:Destroy()
+    end
+    CurrentESP = {}
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local highlight = Instance.new("Highlight")
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
+            highlight.Parent = player.Character or player.CharacterAdded:Wait()
+            CurrentESP[player] = highlight
+        end
+    end
+end
+
+local function GiveInfiniteJump()
+    UIS.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.Space then
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end)
+end
+
+-- Powers with proper rarities including "We're Broke" effect
+local Powers = {
+    -- ⚡ LEGENDARY (Most OP - 4.5% total)
+    {func = LoadInfiniteYield, name = "INFINITE YIELD", desc = "Ultimate admin commands", rarity = "LEGENDARY", chance = 2},
+    {func = LoadAimlockScript, name = "AIMLOCK BOT", desc = "Auto-aim combat", rarity = "LEGENDARY", chance = 1},
+    {func = LoadFlingScript, name = "FLING SCRIPT", desc = "Launch players everywhere", rarity = "LEGENDARY", chance = 1},
+    {func = LoadInvisibleScript, name = "INVISIBLE SCRIPT", desc = "Become completely invisible", rarity = "LEGENDARY", chance = 1},
+    
+    -- 💜 EPIC (Very OP - 14% total)
+    {func = LoadFlyGuiV3, name = "FLY GUI V3", desc = "Best flight system", rarity = "EPIC", chance = 5},
+    {func = LoadInstantTransmission, name = "INSTANT TRANSMISSION", desc = "Teleport anywhere", rarity = "EPIC", chance = 5},
+    {func = LoadGoonScript, name = "GOON SCRIPT", desc = "Various powerful features", rarity = "EPIC", chance = 4},
+    
+    -- 🔵 RARE (OP - 30% total)
+    {func = GiveNoclip, name = "NO CLIP", desc = "Walk through walls", rarity = "RARE", chance = 15},
+    {func = GiveESP, name = "PLAYER ESP", desc = "See through walls", rarity = "RARE", chance = 15},
+    
+    -- ⚪ COMMON (Basic - 50% total)
+    {func = GiveSpeedBoost, name = "SUPER SPEED", desc = "Faster movement", rarity = "COMMON", chance = 25},
+    {func = GiveInfiniteJump, name = "INFINITE JUMP", desc = "Jump infinitely", rarity = "COMMON", chance = 25},
+    
+    -- 💀 CURSES (Negative effects - 1.5% total)
+    {func = VegetableLock, name = "VEGETABLE LOCK", desc = "Frozen as a vegetable!", rarity = "CURSE", chance = 1},
+    {func = WereBrokeEffect, name = "WE'RE BROKE!", desc = "Character reset + money effect", rarity = "CURSE", chance = 0.5}, -- 0.5% chance
+}
+
+local ReelSymbols = {"🍒", "🍋", "💎", "🍊", "⭐", "🔔", "🍇", "🍉", "7️⃣", "💵"}
+
+-- Function to get random power (including curses)
+local function GetRandomPower()
+    local availablePowers = {}
+    
+    -- Filter out used powers (but curses can repeat)
+    for _, power in pairs(Powers) do
+        if not UsedPowers[power.name] or power.rarity == "CURSE" then
+            table.insert(availablePowers, power)
+        end
+    end
+    
+    -- If all powers are used, reset (except curses)
+    if #availablePowers == 0 then
+        UsedPowers = {}
+        for _, power in pairs(Powers) do
+            if power.rarity ~= "CURSE" then
+                table.insert(availablePowers, power)
+            end
+        end
+        StatusLabel.Text = "ALL POWERS USED!\nResetting collection..."
+        wait(2)
+    end
+    
+    -- Create weighted table
+    local weightedTable = {}
+    for _, power in pairs(availablePowers) do
+        -- Multiply chance by 2 to make 0.5% actually work (0.5 * 2 = 1 entry)
+        local entries = math.max(1, math.floor(power.chance * 2))
+        for i = 1, entries do
+            table.insert(weightedTable, power)
+        end
+    end
+    
+    local randomPower = weightedTable[math.random(1, #weightedTable)]
+    
+    -- Only track non-curse powers to prevent duplicates
+    if randomPower.rarity ~= "CURSE" then
+        UsedPowers[randomPower.name] = true
+    end
+    
+    return randomPower
+end
+
+-- Cooldown system
+local canSpin = true
+local spinCooldown = 5 -- 5 seconds cooldown
+
+-- Spin animation function
+local function SpinReels()
+    if not canSpin then return end
+    
+    -- Start cooldown
+    canSpin = false
+    SpinButton.Text = "WAIT..."
+    SpinButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    
+    -- Realistic slot machine animation
+    for i = 1, 25 do
+        Symbol1.Text = ReelSymbols[math.random(1, #ReelSymbols)]
+        if i > 8 then Symbol2.Text = ReelSymbols[math.random(1, #ReelSymbols)] end
+        if i > 16 then Symbol3.Text = ReelSymbols[math.random(1, #ReelSymbols)] end
+        wait(0.1 - (i * 0.003))
+    end
+    
+    -- Get random power
+    local power = GetRandomPower()
+    
+    -- Set colors based on rarity
+    local textColor = Color3.fromRGB(200, 200, 255) -- Common
+    local bgColor = Color3.fromRGB(30, 30, 45)
+    
+    if power.rarity == "RARE" then
+        textColor = Color3.fromRGB(0, 150, 255) -- Blue
+    elseif power.rarity == "EPIC" then
+        textColor = Color3.fromRGB(180, 0, 255) -- Purple
+    elseif power.rarity == "LEGENDARY" then
+        textColor = Color3.fromRGB(255, 215, 0) -- Gold
+        CreateLegendaryEffect()
+    elseif power.rarity == "CURSE" then
+        textColor = Color3.fromRGB(255, 50, 50) -- Red for curses
+        bgColor = Color3.fromRGB(50, 0, 0)
+    end
+    
+    StatusLabel.Text = power.rarity .. "!\n" .. power.name .. "\n" .. power.desc
+    StatusLabel.TextColor3 = textColor
+    StatusLabel.BackgroundColor3 = bgColor
+    
+    -- Execute the power
+    power.func()
+    
+    -- Start cooldown timer
+    spawn(function()
+        for i = spinCooldown, 1, -1 do
+            SpinButton.Text = "WAIT " .. i .. "s"
+            wait(1)
+        end
+        canSpin = true
+        SpinButton.Text = "SPIN"
+        SpinButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    end)
+end
+
+-- Connect spin button
+SpinButton.MouseButton1Click:Connect(SpinReels)
+
+print("🎰 JACKABE SLOT MACHINE Loaded!")
+print("💸 0.5% WE'RE BROKE EFFECT - Character reset + money emojis!")
+print("🎯 ALL CURSES ARE NOW ACTUALLY ROLLABLE!")
+print("🌟 LEGENDARY EFFECTS - Gold flash + sparkles!")
+print("🥦 1% VEGETABLE LOCK - Freezes player + veggie spam!")
+print("🔄 NO DUPLICATES (except curses can repeat)")
+print("⏳ 5 SECOND COOLDOWN between spins!")
+print("🖱️ Drag the top bar to move!")
